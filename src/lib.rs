@@ -5,6 +5,8 @@ use hdf5::filters::blosc_set_nthreads;
 use hdf5::types::VarLenAscii;
 use hdf5::{Error, File, Group, Result};
 use std::collections::HashMap;
+use resolve_path::PathResolveExt;
+
 
 #[cfg(test)]
 mod tests {
@@ -12,6 +14,16 @@ mod tests {
     fn it_works() {
         assert_eq!(2 + 2, 4);
     }
+}
+
+pub enum RawAttrsOpts<'a> {
+    Duration(u32),
+    EndReason(u8),
+    MedianBefore(f64),
+    ReadId(&'a str),
+    ReadNumber(i32),
+    StartMux(u8),
+    StartTime(u64)
 }
 
 pub fn read_fast5() -> Result<Vec<Group>, hdf5::Error> {
@@ -113,7 +125,10 @@ impl MultiFast5File {
         tracking_id: &HashMap<&str, &str>,
         context_tags: &HashMap<&str, &str>,
         channel_info: ChannelInfo,
+        raw_attrs: &HashMap<&str, RawAttrsOpts>
     ) -> Result<Group, Error> {
+        // plz work
+        std::env::set_var("HDF5_PLUGIN_PATH", "./vbz_plugin".resolve().as_os_str());
         let group_name = format!("read_{}", read_id);
         let group = self.handle.create_group(&group_name).unwrap();
         let s = VarLenAscii::from_ascii(run_id.as_str()).unwrap();
@@ -136,11 +151,12 @@ impl MultiFast5File {
             let context_group = group.create_group("context_tags")?;
             let tracking_group = group.create_group("tracking_id")?;
             let channel_group = group.create_group("channel_id")?;
+            let raw_data_group = group.create_group("Raw")?;
             utils::add_tracking_info(tracking_group, &tracking_id)?;
             utils::add_context_tags(context_group, context_tags)?;
             utils::add_channel_info(channel_group, channel_info)?;
+            utils::add_raw_data(raw_data_group, vec![1,2,3,4,5,6], raw_attrs)?;
         }
-
         Ok(group)
     }
 

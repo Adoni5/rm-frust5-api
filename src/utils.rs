@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, hash_map};
 
 use hdf5;
-use hdf5::types::VarLenAscii;
+use hdf5::types::{VarLenAscii, FixedAscii};
 
-use crate::ChannelInfo;
+use crate::{ChannelInfo, RawAttrsOpts};
 
 fn _set_string_attributes(
     group: hdf5::Group,
@@ -52,7 +52,59 @@ pub fn add_channel_info(group: hdf5::Group, data: ChannelInfo) -> Result<(), hdf
     Ok(())
 }
 
-pub fn add_raw_data(group: hdf5::Group, data: ChannelInfo) -> Result<(), hdf5::Error> {
-    
+pub fn add_raw_data(group: hdf5::Group, data: Vec<i16>, attrs: &HashMap<&str, RawAttrsOpts>) -> Result<(), hdf5::Error> {
+    // set attributes on the group
+    for (key, value) in attrs.into_iter() {
+        match value {
+            // reference and not reference not important on match - just testing that out!
+            &RawAttrsOpts::ReadId(read_id) => {
+                let attr = FixedAscii::< 37 >::from_ascii(read_id).unwrap();
+                group
+                    .new_attr::<FixedAscii<37>>()
+                    .create(*key)?
+                    .write_scalar(&attr)?;
+            },
+            &RawAttrsOpts::Duration(duration) => {
+                group
+                .new_attr::<u32>()
+                .create(*key)?
+                .write_scalar(&duration)?;
+            },
+            &RawAttrsOpts::EndReason(end_reason) => {
+                group
+                .new_attr::<u8>()
+                .create(*key)?
+                .write_scalar(&end_reason)?;
+            },
+            &RawAttrsOpts::MedianBefore(median_before) => {
+                group
+                .new_attr::<f64>()
+                .create(*key)?
+                .write_scalar(&median_before)?;
+            },
+            RawAttrsOpts::ReadNumber(read_number) => {
+                group
+                .new_attr::<i32>()
+                .create(*key)?
+                .write_scalar(read_number)?;
+            },
+            RawAttrsOpts::StartMux(start_mux) => {
+                group
+                .new_attr::<u8>()
+                .create(*key)?
+                .write_scalar(start_mux)?;
+            },
+            RawAttrsOpts::StartTime(start_time) => {
+                group
+                .new_attr::<u64>()
+                .create(*key)?
+                .write_scalar(start_time)?;
+            }
+        }
+    }
+    #[cfg(feature = "blosc")]
+    blosc_set_nthreads(2); // set number of blosc threads
+    let builder = group.new_dataset_builder();
+    builder.add_filter(32020, &[0,2,1,1]).with_data(&vec![10_i16,10_i16,12_i16]).create("Signal")?;
     Ok(())
 }
