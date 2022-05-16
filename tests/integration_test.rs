@@ -75,7 +75,7 @@ fn write_test_fast5() {
             &tracking_id,
             &context_tags,
             channel_info,
-            &raw_attrs
+            &raw_attrs,
         )
         .unwrap();
     let channel_info = ChannelInfo::new(8192_f64, 6.0, 1500.0, 4000.0, String::from("241"));
@@ -87,7 +87,7 @@ fn write_test_fast5() {
             &tracking_id,
             &context_tags,
             channel_info,
-            &raw_attrs
+            &raw_attrs,
         )
         .unwrap();
 }
