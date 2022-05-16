@@ -1,12 +1,12 @@
 [package]
 name = "rm-frust5-api"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
 rust-version = "1.58.0"
 authors = ["adoni5 <roryjmunro1@gmail.com>"]
 description = "A rust wrapper of the HDF5 crate for handling Oxford Nanopore Technologies FAST5 files."
 homepage = "https://github.com/Adoni5/rm-frust5-api"
-documentation = "https://docs.rs/rm-frust5-api/0.1.0/rm_frust5_api"
+documentation = "https://docs.rs/rm-frust5-api"
 repository = "https://github.com/Adoni5/rm-frust5-api"
 readme = "README.md"
 license = "MIT"
