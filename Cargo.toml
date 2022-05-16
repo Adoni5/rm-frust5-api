@@ -12,6 +12,9 @@ readme = "README.md"
 license = "MIT"
 keywords = ["Bioinformatics", "ONT", "FAST5", "HDF5"]
 categories = ["filesystem", "parsing", "science"]
+exclude = [
+    "*.fast5"
+]
 
 [lib]
 name = "frust5_api"
