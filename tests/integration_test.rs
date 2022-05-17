@@ -68,6 +68,7 @@ fn write_test_fast5() {
     let channel_info = ChannelInfo::new(8192_f64, 6.0, 1500.0, 4000.0, String::from("241"));
     let mut multi =
         frust5_api::MultiFast5File::new("test2.fast5".to_string(), frust5_api::OpenMode::Append);
+    let data: Vec<i16> = vec![10, 12, 14, 16];
     multi
         .create_empty_read(
             "get_your_tsaty_read_right_here".to_string(),
@@ -76,10 +77,11 @@ fn write_test_fast5() {
             &context_tags,
             channel_info,
             &raw_attrs,
+            data
         )
         .unwrap();
     let channel_info = ChannelInfo::new(8192_f64, 6.0, 1500.0, 4000.0, String::from("241"));
-
+    let data: Vec<i16> = vec![10, 12, 14, 16, 18, 20];
     multi
         .create_empty_read(
             "get_your_tsaty_read_right_here2".to_string(),
@@ -88,6 +90,7 @@ fn write_test_fast5() {
             &context_tags,
             channel_info,
             &raw_attrs,
+            data
         )
         .unwrap();
 }

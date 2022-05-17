@@ -112,7 +112,7 @@ pub fn add_raw_data(
     let builder = group.new_dataset_builder();
     builder
         .add_filter(32020, &[0, 2, 1, 1])
-        .with_data(&vec![10_i16, 10_i16, 12_i16])
+        .with_data(&data)
         .create("Signal")?;
     Ok(())
 }
