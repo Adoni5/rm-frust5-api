@@ -52,9 +52,7 @@ pub enum RawAttrsOpts<'a> {
 /// # Example
 /// ```rust
 /// use frust5_api::read_fast5;
-/// for group in read_fast5("FAL37440_pass_5e83140e_100.fast5")? {
-///     println!(group)
-/// };
+
 /// ```
 pub fn read_fast5(file_name: &str) -> Result<Vec<Group>, hdf5::Error> {
     let file = File::open(file_name)?; // open for reading
@@ -135,10 +133,7 @@ impl MultiFast5File {
     /// - If opening for reading and the file doesn't already exist.
     /// 
     /// # Examples
-    /// ```rust
-    /// use frust5_api::{MultiFast5File. OpenMode}
-    /// 
-    /// let mut multi = frust5_api::MultiFast5File::new("test.fast5".to_string(), frust5_api::OpenMode::Append);
+    /// ```
     /// ```
     pub fn new(filename: String, mode: OpenMode) -> MultiFast5File {
         let file = match mode {
@@ -183,6 +178,7 @@ impl MultiFast5File {
         context_tags: &HashMap<&str, &str>,
         channel_info: ChannelInfo,
         raw_attrs: &HashMap<&str, RawAttrsOpts>,
+        signal: Vec<i16>
     ) -> Result<Group, Error> {
         // plz work
         std::env::set_var("HDF5_PLUGIN_PATH", "./vbz_plugin".resolve().as_os_str());
@@ -192,7 +188,7 @@ impl MultiFast5File {
         group
             .new_attr::<VarLenAscii>()
             .create("run_id")?
-            .write_scalar(&s)?;
+            .write_scalar(&s).expect(format!("{} group is {:#?}", &s, group).as_str());
         // set the shared groups for every read - namely the contstant Dict attributes
         if self._run_id_map.contains_key(&run_id) {
             for shared_group in HARDLINK_GROUPS {
@@ -208,13 +204,13 @@ impl MultiFast5File {
             self._run_id_map.insert(run_id, read_id);
             let context_group = group.create_group("context_tags")?;
             let tracking_group = group.create_group("tracking_id")?;
-            let channel_group = group.create_group("channel_id")?;
-            let raw_data_group = group.create_group("Raw")?;
             utils::add_tracking_info(tracking_group, &tracking_id)?;
             utils::add_context_tags(context_group, context_tags)?;
-            utils::add_channel_info(channel_group, channel_info)?;
-            utils::add_raw_data(raw_data_group, vec![1, 2, 3, 4, 5, 6], raw_attrs)?;
         }
+        let channel_group = group.create_group("channel_id")?;
+        let raw_data_group = group.create_group("Raw")?;
+        utils::add_channel_info(channel_group, channel_info)?;
+        utils::add_raw_data(raw_data_group, signal, raw_attrs)?;
         Ok(group)
     }
 }
